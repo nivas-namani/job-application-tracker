@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { @apply border-slate-200; }
+  html { @apply bg-canvas; }
+  body { @apply m-0 min-w-[320px] bg-canvas font-[Manrope] text-ink antialiased; }
+  button, input, select, textarea { font: inherit; }
+  button { @apply disabled:cursor-not-allowed disabled:opacity-50; }
+  :focus-visible { @apply outline-none ring-2 ring-violet ring-offset-2; }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar { width: 7px; height: 7px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { @apply rounded-full bg-slate-300; }
+}

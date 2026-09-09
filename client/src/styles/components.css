@@ -1,0 +1,13 @@
+@layer components {
+  .page-shell { @apply mx-auto max-w-[1600px] px-5 py-8 sm:px-7; }
+  .surface-card { @apply rounded-2xl border bg-white shadow-card; }
+  .button { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50; }
+  .button-primary { @apply button bg-violet text-white shadow-sm hover:bg-[#4930d7]; }
+  .button-secondary { @apply button border bg-white text-ink hover:bg-slate-50; }
+  .button-danger { @apply button text-rose-700 hover:bg-rose-50; }
+  .form-input { @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-ink shadow-sm placeholder:text-slate-400 focus:border-violet focus:ring-2 focus:ring-violet/15; }
+  .form-label { @apply mb-1.5 block text-xs font-bold text-ink; }
+  .modal-backdrop { @apply fixed inset-0 z-50 grid place-items-center bg-ink/45 p-4; }
+  .drawer-backdrop { @apply fixed inset-0 z-40 bg-ink/35; }
+  .section-heading { @apply mb-3 text-[11px] font-extrabold uppercase tracking-wide text-muted; }
+}

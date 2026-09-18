@@ -5,6 +5,10 @@ const responseStatuses = new Set<ApplicationStatus>(['SCREENING', 'INTERVIEW', '
 
 export const isClosed = (status: ApplicationStatus) => closedStatuses.has(status);
 
+/** Screening onward is when the employer's rounds actually matter, so the drawer leads with them. */
+export const isProcessRelevant = (application: Application) =>
+  application.status === 'SCREENING' || application.status === 'INTERVIEW' || application.status === 'OFFER';
+
 export function getMetrics(applications: Application[], now = new Date()) {
   const active = applications.filter((application) => !isClosed(application.status));
   const applied = applications.filter((application) => application.appliedAt);

@@ -16,6 +16,9 @@ services:
         generateValue: true
       - key: COOKIE_SECURE
         value: true
+      # Set this to the service's own public URL, e.g. https://trackify.onrender.com
+      - key: CLIENT_ORIGIN
+        sync: false
       - key: S3_ENDPOINT
         sync: false
       - key: S3_REGION

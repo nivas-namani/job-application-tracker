@@ -5,7 +5,7 @@ import type { Application } from '../types';
 const base = (overrides: Partial<Application>): Application => ({
   id: 'application-1', company: 'Acme', role: 'Engineer', status: 'APPLIED', appliedAt: '2026-08-01T00:00:00.000Z',
   jobUrl: null, location: null, source: null, salaryMin: null, salaryMax: null, currency: 'USD', description: null,
-  followUpAt: null, firstResponseAt: null, resumeId: null, resume: null, statusHistory: [], createdAt: '2026-08-01T00:00:00.000Z', updatedAt: '2026-08-01T00:00:00.000Z',
+  followUpAt: null, firstResponseAt: null, archivedAt: null, resumeId: null, processStageId: null, resume: null, statusHistory: [], createdAt: '2026-08-01T00:00:00.000Z', updatedAt: '2026-08-01T00:00:00.000Z',
   ...overrides
 });
 

@@ -7,6 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum HiringStageKind {
+  RECRUITER_SCREEN
+  ONLINE_ASSESSMENT
+  TECHNICAL
+  SYSTEM_DESIGN
+  BEHAVIOURAL
+  HIRING_MANAGER
+  ONSITE
+  TEAM_MATCH
+  HR_DISCUSSION
+  OFFER
+  OTHER
+}
+
 enum ApplicationStatus {
   SAVED
   APPLIED
@@ -20,66 +34,100 @@ enum ApplicationStatus {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  name         String        @db.VarChar(100)
-  email        String        @unique @db.VarChar(320)
+  id           String                  @id @default(cuid())
+  name         String                  @db.VarChar(100)
+  email        String                  @unique @db.VarChar(320)
   passwordHash String
   applications Application[]
   resumes      Resume[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  processes    HiringProcessTemplate[]
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
 }
 
 model Application {
-  id               String                     @id @default(cuid())
-  userId           String
-  company          String                     @db.VarChar(120)
-  role             String                     @db.VarChar(120)
-  status           ApplicationStatus          @default(SAVED)
-  appliedAt        DateTime?
-  jobUrl           String?                    @db.VarChar(2048)
-  location         String?                    @db.VarChar(160)
-  source           String?                    @db.VarChar(120)
-  salaryMin        Int?
-  salaryMax        Int?
-  currency         String                     @default("USD") @db.VarChar(3)
-  description      String?                    @db.Text
-  followUpAt       DateTime?
-  firstResponseAt  DateTime?
-  resumeId         String?
-  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  resume           Resume?                    @relation(fields: [resumeId], references: [id], onDelete: SetNull)
-  statusHistory    ApplicationStatusHistory[]
-  createdAt        DateTime                   @default(now())
-  updatedAt        DateTime                   @updatedAt
+  id              String                     @id @default(cuid())
+  userId          String
+  company         String                     @db.VarChar(120)
+  role            String                     @db.VarChar(120)
+  status          ApplicationStatus          @default(SAVED)
+  appliedAt       DateTime?
+  jobUrl          String?                    @db.VarChar(2048)
+  location        String?                    @db.VarChar(160)
+  source          String?                    @db.VarChar(120)
+  salaryMin       Int?
+  salaryMax       Int?
+  currency        String                     @default("USD") @db.VarChar(3)
+  description     String?                    @db.Text
+  followUpAt      DateTime?
+  firstResponseAt DateTime?
+  archivedAt      DateTime?
+  resumeId        String?
+  processStageId  String?
+  user            User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume          Resume?                    @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  processStage    HiringProcessStage?        @relation(fields: [processStageId], references: [id], onDelete: SetNull)
+  statusHistory   ApplicationStatusHistory[]
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
 
   @@index([userId, status])
   @@index([userId, followUpAt])
   @@index([userId, createdAt])
+  @@index([userId, archivedAt])
 }
 
 model ApplicationStatusHistory {
-  id            String            @id @default(cuid())
+  id            String             @id @default(cuid())
   applicationId String
   fromStatus    ApplicationStatus?
   toStatus      ApplicationStatus
-  changedAt     DateTime          @default(now())
-  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  changedAt     DateTime           @default(now())
+  application   Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@index([applicationId, changedAt])
 }
 
 model Resume {
-  id         String          @id @default(cuid())
-  userId     String
-  fileName   String          @db.VarChar(255)
-  storageKey String          @unique @db.VarChar(512)
-  mimeType   String          @db.VarChar(120)
-  size       Int
-  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String        @id @default(cuid())
+  userId       String
+  fileName     String        @db.VarChar(255)
+  storageKey   String        @unique @db.VarChar(512)
+  mimeType     String        @db.VarChar(120)
+  size         Int
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   applications Application[]
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   @@index([userId, createdAt])
+}
+
+model HiringProcessTemplate {
+  id         String               @id @default(cuid())
+  userId     String
+  company    String               @db.VarChar(120)
+  companyKey String               @db.VarChar(120)
+  notes      String?              @db.Text
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stages     HiringProcessStage[]
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+
+  @@unique([userId, companyKey])
+  @@index([userId, company])
+}
+
+model HiringProcessStage {
+  id                  String                @id @default(cuid())
+  templateId          String
+  name                String                @db.VarChar(120)
+  kind                HiringStageKind       @default(OTHER)
+  position            Int
+  typicalDurationDays Int?
+  notes               String?               @db.Text
+  template            HiringProcessTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  applications        Application[]
+
+  @@index([templateId, position])
 }

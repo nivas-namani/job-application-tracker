@@ -1,4 +1,4 @@
-import type { Application, ApplicationStatus, Resume, User } from '../types';
+import type { Application, ApplicationStatus, HiringProcess, HiringStageKind, Resume, User } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -34,7 +34,29 @@ export type ApplicationInput = {
   description?: string | null;
   followUpAt?: string | null;
   resumeId?: string | null;
+  processStageId?: string | null;
 };
+
+export type ParsedJobPosting = {
+  company: string | null;
+  role: string | null;
+  location: string | null;
+  source: string | null;
+  description: string | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  currency: string | null;
+  appliedAt: string | null;
+  confidence: 'high' | 'medium' | 'low';
+};
+
+export type HiringProcessInput = {
+  company: string;
+  notes?: string | null;
+  stages: { name: string; kind: HiringStageKind; typicalDurationDays?: number | null; notes?: string | null }[];
+};
+
+export type ImportResult = { imported: number; skipped: number; errors: { row: number; message: string }[] };
 
 export const api = {
   register: (data: { name: string; email: string; password: string }) =>
@@ -43,12 +65,22 @@ export const api = {
     request<{ user: User }>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   logout: () => request<void>('/auth/logout', { method: 'POST' }),
   me: () => request<{ user: User }>('/auth/me'),
-  applications: () => request<{ applications: Application[] }>('/applications'),
+  applications: (archived = false) => request<{ applications: Application[] }>(`/applications${archived ? '?archived=all' : ''}`),
   createApplication: (data: ApplicationInput) =>
     request<{ application: Application }>('/applications', { method: 'POST', body: JSON.stringify(data) }),
   updateApplication: (id: string, data: Partial<ApplicationInput>) =>
     request<{ application: Application }>(`/applications/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteApplication: (id: string) => request<void>(`/applications/${id}`, { method: 'DELETE' }),
+  archiveApplication: (id: string, archived: boolean) =>
+    request<{ application: Application }>(`/applications/${id}/archive`, { method: 'POST', body: JSON.stringify({ archived }) }),
+  parseJobLink: (jobUrl: string) =>
+    request<{ jobUrl: string; posting: ParsedJobPosting }>('/applications/parse-link', { method: 'POST', body: JSON.stringify({ jobUrl }) }),
+  importApplications: (csv: string) => request<ImportResult>('/applications/import', { method: 'POST', body: JSON.stringify({ csv }) }),
+  exportUrl: () => `${API_BASE}/applications/export.csv`,
+  processes: () => request<{ processes: HiringProcess[] }>('/processes'),
+  createProcess: (data: HiringProcessInput) => request<{ process: HiringProcess }>('/processes', { method: 'POST', body: JSON.stringify(data) }),
+  updateProcess: (id: string, data: HiringProcessInput) => request<{ process: HiringProcess }>(`/processes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteProcess: (id: string) => request<void>(`/processes/${id}`, { method: 'DELETE' }),
   resumes: () => request<{ resumes: Resume[] }>('/resumes'),
   uploadResume: (file: File, applicationId?: string) => {
     const formData = new FormData();

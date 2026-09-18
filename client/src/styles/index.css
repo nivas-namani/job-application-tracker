@@ -8,6 +8,8 @@
 @layer base {
   * { @apply border-slate-200; }
   html { @apply bg-canvas; }
+  /* One shared board height keeps every column the same size no matter how many cards it holds. */
+  :root { --board-height: calc(100vh - 340px); }
   body { @apply m-0 min-w-[320px] bg-canvas font-[Manrope] text-ink antialiased; }
   button, input, select, textarea { font: inherit; }
   button { @apply disabled:cursor-not-allowed disabled:opacity-50; }

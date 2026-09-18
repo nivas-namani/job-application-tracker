@@ -9,6 +9,7 @@ import { env } from './config.js';
 import { errorHandler } from './http.js';
 import authRouter from './routes/auth.js';
 import applicationsRouter from './routes/applications.js';
+import processesRouter from './routes/processes.js';
 import resumesRouter from './routes/resumes.js';
 
 export const app = express();
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRouter);
 app.use('/api/applications', applicationsRouter);
+app.use('/api/processes', processesRouter);
 app.use('/api/resumes', resumesRouter);
 
 const clientDist = resolve(process.cwd(), 'client', 'dist');

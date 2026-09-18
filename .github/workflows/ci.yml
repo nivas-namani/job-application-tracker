@@ -65,15 +65,33 @@ jobs:
           retention-days: 7
 
   deploy:
-    name: Deploy to Render
+    name: Deploy
     needs: quality
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # The secrets context cannot be read from a job-level `if`, and a step's own
+    # `env` block is not set when its `if` is evaluated. Job-level env is set
+    # before any step runs, so the provider checks below can read it. Each step
+    # is skipped when its secret is absent, so one repository can target one
+    # provider without the others failing.
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
     steps:
-      # The secrets context is not available in a job-level `if`, so the hook is
-      # checked here instead: a repository without the secret simply skips the call.
-      - name: Trigger production deployment
-        env:
-          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-        if: env.DEPLOY_HOOK != ''
-        run: curl --fail --silent --show-error --request POST "$DEPLOY_HOOK"
+      - uses: actions/checkout@v6
+
+      - name: Set up flyctl
+        if: env.FLY_API_TOKEN != ''
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        if: env.FLY_API_TOKEN != ''
+        run: flyctl deploy --remote-only
+
+      - name: Trigger Render deployment
+        if: env.RENDER_DEPLOY_HOOK_URL != ''
+        run: curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK_URL"
+
+      # Railway needs nothing here: connect the repository in the Railway
+      # dashboard and turn on "Wait for CI" so it deploys only after this
+      # workflow passes.

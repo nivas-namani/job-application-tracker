@@ -1,0 +1,33 @@
+# Fly.io configuration for Trackify. `fly launch --no-deploy` regenerates this
+# file; the values below match the repository Dockerfile, which runs
+# `prisma migrate deploy` before starting Express.
+app = "trackify"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "4000"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  auto_start_machines = true
+  # Scaling to zero keeps a demo deployment cheap. Each cold start re-runs
+  # `prisma migrate deploy`, which is idempotent and fast once migrations
+  # are applied. Set this to 1 to avoid the wait on the first request.
+  auto_stop_machines = "stop"
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/health"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

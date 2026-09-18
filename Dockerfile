@@ -1,5 +1,9 @@
 FROM node:20-bookworm-slim
 
+# Prisma reads the OpenSSL version to choose its query-engine binary. The slim
+# image omits OpenSSL, so Prisma warns and falls back to a guessed version.
+RUN apt-get update -y     && apt-get install -y --no-install-recommends openssl ca-certificates     && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY package.json package-lock.json ./

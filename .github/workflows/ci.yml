@@ -67,8 +67,13 @@ jobs:
   deploy:
     name: Deploy to Render
     needs: quality
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.RENDER_DEPLOY_HOOK_URL != ''
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      # The secrets context is not available in a job-level `if`, so the hook is
+      # checked here instead: a repository without the secret simply skips the call.
       - name: Trigger production deployment
-        run: curl --fail --silent --show-error --request POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        if: env.DEPLOY_HOOK != ''
+        run: curl --fail --silent --show-error --request POST "$DEPLOY_HOOK"

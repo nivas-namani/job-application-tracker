@@ -17,7 +17,10 @@ export const app = express();
 app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], styleSrc: ["'self'", 'https://fonts.googleapis.com'], fontSrc: ["'self'", 'https://fonts.gstatic.com'], imgSrc: ["'self'", 'data:', 'https:'] } } }));
 app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use(express.json({ limit: '1mb' }));
+// 3 MB covers the largest CSV the import route accepts (2,000,000 characters,
+// which can exceed 2 MB once multi-byte characters are encoded). Every other
+// endpoint sends far less than this.
+app.use(express.json({ limit: '3mb' }));
 app.use(cookieParser());
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));

@@ -4,7 +4,11 @@ import { prisma } from './prisma.js';
 
 async function start() {
   await prisma.$connect();
-  const server = app.listen(env.PORT, () => console.log(`Trackify API listening on http://localhost:${env.PORT}`));
+  const server = app.listen(
+    env.PORT,
+    '0.0.0.0',
+    () => console.log(`Trackify API listening on port ${env.PORT}`)
+  );
   const shutdown = async () => { await prisma.$disconnect(); server.close(() => process.exit(0)); };
   process.on('SIGINT', () => void shutdown());
   process.on('SIGTERM', () => void shutdown());

@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    // Without this Vite quietly moves to the next free port and the e2e run
+    // waits on 5173 until it times out with no indication of why.
+    strictPort: true,
     proxy: {
       '/api': {
         target: 'http://localhost:4000',

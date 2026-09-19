@@ -4,7 +4,8 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { env } from './config.js';
 import { errorHandler } from './http.js';
 import authRouter from './routes/auth.js';
@@ -29,7 +30,10 @@ app.use('/api/applications', applicationsRouter);
 app.use('/api/processes', processesRouter);
 app.use('/api/resumes', resumesRouter);
 
-const clientDist = resolve(process.cwd(), 'client', 'dist');
+// Resolved from this module, not the working directory: `npm run -w @trackify/server`
+// starts the process inside server/, so a cwd-relative path misses client/dist and
+// every page request falls through to a 404. Works from src/ and from dist/ alike.
+const clientDist = resolve(dirname(fileURLToPath(import.meta.url)), '../../client/dist');
 if (env.NODE_ENV === 'production' && existsSync(clientDist)) {
   app.use(express.static(clientDist));
   app.get(/^(?!\/api).*/, (_req, res) => res.sendFile(resolve(clientDist, 'index.html')));

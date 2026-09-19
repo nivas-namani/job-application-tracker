@@ -15,6 +15,9 @@ test('a new user can create a job application', async ({ page }) => {
   await page.getByLabel('Role').fill('Full Stack Developer');
   await page.getByRole('button', { name: 'Save application' }).click();
 
-  await expect(page.getByRole('heading', { name: 'BrightPath Labs' })).toBeVisible();
-  await expect(page.getByText('Full Stack Developer')).toBeVisible();
+  // The role shows on the board card and again in the drawer, so scope the
+  // assertion to the drawer rather than matching loose text on the page.
+  const drawer = page.getByLabel('BrightPath Labs details');
+  await expect(drawer.getByRole('heading', { name: 'BrightPath Labs' })).toBeVisible();
+  await expect(drawer.getByText('Full Stack Developer')).toBeVisible();
 });
